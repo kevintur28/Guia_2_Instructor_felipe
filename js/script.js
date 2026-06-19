@@ -52,7 +52,6 @@ const glossary = [
 ];
 
 const glossaryBody = document.querySelector("#glossaryBody");
-
 glossary.forEach(([english, spanish, definition]) => {
   const row = document.createElement("tr");
   row.innerHTML = `<td><strong>${english}</strong></td><td>${spanish}</td><td>${definition}</td>`;
@@ -72,68 +71,101 @@ toggleButton.addEventListener("click", () => {
   toggleButton.textContent = currentLanguage === "es" ? "Cambiar a ingles" : "Switch to Spanish";
 });
 
-/* ─── BOOTSTRAP FALLBACK ──────────────────────────────────────── */
-if (!window.bootstrap) {
-  document.querySelectorAll(".accordion [data-bs-toggle='collapse']").forEach((button) => {
-    button.addEventListener("click", () => {
-      const target = document.querySelector(button.dataset.bsTarget);
-      const parent = button.closest(".accordion");
+/* ─── ACCORDION — funciona con o sin Bootstrap JS ─────────────── */
+document.querySelectorAll(".accordion-button").forEach((button) => {
+  button.addEventListener("click", () => {
+    const targetSel = button.getAttribute("data-bs-target");
+    const target = document.querySelector(targetSel);
+    const parent = button.closest(".accordion");
 
-      if (parent) {
-        parent.querySelectorAll(".accordion-collapse").forEach((panel) => {
-          if (panel !== target) panel.classList.remove("show");
-        });
-        parent.querySelectorAll(".accordion-button").forEach((item) => {
-          if (item !== button) item.classList.add("collapsed");
-        });
-      }
-
-      target.classList.toggle("show");
-      button.classList.toggle("collapsed", !target.classList.contains("show"));
-    });
-  });
-
-  document.querySelectorAll("[data-bs-toggle='modal']").forEach((button) => {
-    button.addEventListener("click", () => {
-      document.querySelector(button.dataset.bsTarget).classList.add("show");
-      document.body.style.overflow = "hidden";
-    });
-  });
-
-  document.querySelectorAll("[data-bs-dismiss='modal'], .modal").forEach((element) => {
-    element.addEventListener("click", (event) => {
-      if (event.target !== element && !element.matches("[data-bs-dismiss='modal']")) return;
-      const modal = element.closest(".modal") || element;
-      modal.classList.remove("show");
-      document.body.style.overflow = "";
-    });
-  });
-
-  document.querySelectorAll(".carousel").forEach((carousel) => {
-    const items = [...carousel.querySelectorAll(".carousel-item")];
-    const indicators = [...carousel.querySelectorAll(".carousel-indicators button")];
-    let index = Math.max(0, items.findIndex((item) => item.classList.contains("active")));
-
-    const showSlide = (nextIndex) => {
-      index = (nextIndex + items.length) % items.length;
-      items.forEach((item, itemIndex) => item.classList.toggle("active", itemIndex === index));
-      indicators.forEach((indicator, itemIndex) => {
-        indicator.classList.toggle("active", itemIndex === index);
-        indicator.toggleAttribute("aria-current", itemIndex === index);
+    if (parent) {
+      parent.querySelectorAll(".accordion-collapse").forEach((panel) => {
+        if (panel !== target) {
+          panel.classList.remove("show");
+          panel.style.display = "none";
+        }
       });
-    };
+      parent.querySelectorAll(".accordion-button").forEach((btn) => {
+        if (btn !== button) btn.classList.add("collapsed");
+      });
+    }
 
-    carousel.querySelector("[data-bs-slide='prev']")?.addEventListener("click", () => showSlide(index - 1));
-    carousel.querySelector("[data-bs-slide='next']")?.addEventListener("click", () => showSlide(index + 1));
-    indicators.forEach((indicator, itemIndex) => indicator.addEventListener("click", () => showSlide(itemIndex)));
+    const isOpen = target.classList.contains("show");
+    target.classList.toggle("show", !isOpen);
+    target.style.display = isOpen ? "none" : "block";
+    button.classList.toggle("collapsed", isOpen);
   });
-}
+});
+
+/* Inicializar estado visible de accordions al cargar */
+document.querySelectorAll(".accordion-collapse").forEach((panel) => {
+  panel.style.display = panel.classList.contains("show") ? "block" : "none";
+});
+
+/* ─── MODAL — funciona con o sin Bootstrap JS ─────────────────── */
+document.querySelectorAll("[data-bs-toggle='modal']").forEach((button) => {
+  button.addEventListener("click", () => {
+    const target = document.querySelector(button.getAttribute("data-bs-target"));
+    if (!target) return;
+    target.classList.add("show");
+    target.style.display = "flex";
+    document.body.style.overflow = "hidden";
+  });
+});
+
+document.querySelectorAll("[data-bs-dismiss='modal']").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const modal = btn.closest(".modal");
+    if (!modal) return;
+    modal.classList.remove("show");
+    modal.style.display = "none";
+    document.body.style.overflow = "";
+  });
+});
+
+document.querySelectorAll(".modal").forEach((modal) => {
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) {
+      modal.classList.remove("show");
+      modal.style.display = "none";
+      document.body.style.overflow = "";
+    }
+  });
+});
+
+/* Inicializar modals ocultos */
+document.querySelectorAll(".modal").forEach((modal) => {
+  modal.style.display = "none";
+});
+
+/* ─── CAROUSEL — funciona con o sin Bootstrap JS ─────────────── */
+document.querySelectorAll(".carousel").forEach((carousel) => {
+  const items = [...carousel.querySelectorAll(".carousel-item")];
+  const indicators = [...carousel.querySelectorAll(".carousel-indicators button")];
+  let index = Math.max(0, items.findIndex((item) => item.classList.contains("active")));
+
+  const showSlide = (nextIndex) => {
+    index = (nextIndex + items.length) % items.length;
+    items.forEach((item, i) => item.classList.toggle("active", i === index));
+    indicators.forEach((ind, i) => {
+      ind.classList.toggle("active", i === index);
+      ind.toggleAttribute("aria-current", i === index);
+    });
+  };
+
+  const prevBtn = carousel.querySelector("[data-bs-slide='prev']");
+  const nextBtn = carousel.querySelector("[data-bs-slide='next']");
+  if (prevBtn) prevBtn.addEventListener("click", () => showSlide(index - 1));
+  if (nextBtn) nextBtn.addEventListener("click", () => showSlide(index + 1));
+  indicators.forEach((ind, i) => ind.addEventListener("click", () => showSlide(i)));
+});
 
 /* ─── NAVBAR TOGGLER ──────────────────────────────────────────── */
 document.querySelectorAll(".navbar-toggler").forEach((button) => {
   button.addEventListener("click", (event) => {
     event.preventDefault();
     const target = document.querySelector(button.dataset.menuTarget);
+    if (!target) return;
     target.classList.remove("collapsing");
     target.classList.toggle("show");
     button.setAttribute("aria-expanded", String(target.classList.contains("show")));
