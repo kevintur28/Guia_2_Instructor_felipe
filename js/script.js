@@ -1,8 +1,8 @@
 /* ─── THEME TOGGLE ────────────────────────────────────────────── */
 (function () {
-  const html = document.documentElement;
-  const btn = document.getElementById('themeToggle');
-  const icon = btn ? btn.querySelector('.toggle-icon') : null;
+  const html  = document.documentElement;
+  const btn   = document.getElementById('themeToggle');
+  const icon  = btn ? btn.querySelector('.toggle-icon')  : null;
   const label = btn ? btn.querySelector('.toggle-label') : null;
 
   const saved = localStorage.getItem('theme') || 'dark';
@@ -12,7 +12,7 @@
   if (btn) {
     btn.addEventListener('click', function () {
       const current = html.getAttribute('data-theme');
-      const next = current === 'dark' ? 'light' : 'dark';
+      const next    = current === 'dark' ? 'light' : 'dark';
       html.setAttribute('data-theme', next);
       localStorage.setItem('theme', next);
       updateButton(next);
@@ -33,51 +33,61 @@
 
 /* ─── GLOSSARY ────────────────────────────────────────────────── */
 const glossary = [
-  ["Color Theory", "Teoria del color", "Study of how colors interact and create visual perception."],
-  ["Pantone", "Pantone", "Standardized color system used to identify and reproduce colors."],
-  ["User Experience", "Experiencia de usuario", "How a person feels and behaves when using a digital product."],
-  ["Interface", "Interfaz", "Visual space where users interact with a system."],
-  ["Contrast", "Contraste", "Difference between visual elements that improves hierarchy and readability."],
-  ["Palette", "Paleta", "Selected group of colors used in a design project."],
-  ["Branding", "Identidad de marca", "Visual and strategic identity that represents a brand."],
-  ["Typography", "Tipografia", "Style and arrangement of text in visual communication."],
-  ["Layout", "Composicion", "Organization of content inside a page or screen."],
-  ["Accessibility", "Accesibilidad", "Practice of making products usable for different people and abilities."],
-  ["Responsive Design", "Diseno adaptable", "Technique that allows a website to adapt to different screen sizes."],
-  ["Sustainability", "Sostenibilidad", "Responsible use of resources to reduce negative impact."],
-  ["Circular Economy", "Economia circular", "Model focused on reducing waste and reusing resources."],
-  ["Visual Hierarchy", "Jerarquia visual", "Order that guides attention through size, color, spacing, and contrast."],
-  ["Semiotics", "Semiologia", "Study of signs and meanings in communication."],
-  ["Prototype", "Prototipo", "Early model used to test the structure or behavior of a product."]
+  ["Color Theory",      "Teoria del color",      "Study of how colors interact and create visual perception."],
+  ["Pantone",           "Pantone",               "Standardized color system used to identify and reproduce colors."],
+  ["User Experience",   "Experiencia de usuario","How a person feels and behaves when using a digital product."],
+  ["Interface",         "Interfaz",              "Visual space where users interact with a system."],
+  ["Contrast",          "Contraste",             "Difference between visual elements that improves hierarchy and readability."],
+  ["Palette",           "Paleta",                "Selected group of colors used in a design project."],
+  ["Branding",          "Identidad de marca",    "Visual and strategic identity that represents a brand."],
+  ["Typography",        "Tipografia",            "Style and arrangement of text in visual communication."],
+  ["Layout",            "Composicion",           "Organization of content inside a page or screen."],
+  ["Accessibility",     "Accesibilidad",         "Practice of making products usable for different people and abilities."],
+  ["Responsive Design", "Diseno adaptable",      "Technique that allows a website to adapt to different screen sizes."],
+  ["Sustainability",    "Sostenibilidad",        "Responsible use of resources to reduce negative impact."],
+  ["Circular Economy",  "Economia circular",     "Model focused on reducing waste and reusing resources."],
+  ["Visual Hierarchy",  "Jerarquia visual",      "Order that guides attention through size, color, spacing, and contrast."],
+  ["Semiotics",         "Semiologia",            "Study of signs and meanings in communication."],
+  ["Prototype",         "Prototipo",             "Early model used to test the structure or behavior of a product."]
 ];
 
 const glossaryBody = document.querySelector("#glossaryBody");
-glossary.forEach(([english, spanish, definition]) => {
-  const row = document.createElement("tr");
-  row.innerHTML = `<td><strong>${english}</strong></td><td>${spanish}</td><td>${definition}</td>`;
-  glossaryBody.appendChild(row);
-});
+if (glossaryBody) {
+  glossary.forEach(([english, spanish, definition]) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `<td><strong>${english}</strong></td><td>${spanish}</td><td>${definition}</td>`;
+    glossaryBody.appendChild(row);
+  });
+}
 
 /* ─── LANGUAGE TOGGLE ─────────────────────────────────────────── */
 const toggleButton = document.querySelector("#toggleLanguage");
-const panels = document.querySelectorAll(".language-panel");
+const panels       = document.querySelectorAll(".language-panel");
 let currentLanguage = "es";
 
-toggleButton.addEventListener("click", () => {
-  currentLanguage = currentLanguage === "es" ? "en" : "es";
-  panels.forEach((panel) => {
-    panel.classList.toggle("d-none", panel.dataset.lang !== currentLanguage);
+if (toggleButton) {
+  toggleButton.addEventListener("click", () => {
+    currentLanguage = currentLanguage === "es" ? "en" : "es";
+    panels.forEach((panel) => {
+      panel.classList.toggle("d-none", panel.dataset.lang !== currentLanguage);
+    });
+    toggleButton.textContent =
+      currentLanguage === "es" ? "Cambiar a ingles" : "Switch to Spanish";
   });
-  toggleButton.textContent = currentLanguage === "es" ? "Cambiar a ingles" : "Switch to Spanish";
-});
+}
 
-/* ─── ACCORDION — funciona con o sin Bootstrap JS ─────────────── */
+/* ─── ACCORDION ───────────────────────────────────────────────── */
 document.querySelectorAll(".accordion-button").forEach((button) => {
   button.addEventListener("click", () => {
+    // Acepta tanto data-bs-target (Bootstrap) como data-bs-toggle="collapse"
     const targetSel = button.getAttribute("data-bs-target");
+    if (!targetSel) return;
     const target = document.querySelector(targetSel);
+    if (!target) return;
+
     const parent = button.closest(".accordion");
 
+    // Cierra los demás paneles del mismo accordion
     if (parent) {
       parent.querySelectorAll(".accordion-collapse").forEach((panel) => {
         if (panel !== target) {
@@ -92,8 +102,9 @@ document.querySelectorAll(".accordion-button").forEach((button) => {
 
     const isOpen = target.classList.contains("show");
     target.classList.toggle("show", !isOpen);
-    target.style.display = isOpen ? "none" : "block";
+    target.style.display  = isOpen ? "none" : "block";
     button.classList.toggle("collapsed", isOpen);
+    button.setAttribute("aria-expanded", String(!isOpen));
   });
 });
 
@@ -102,13 +113,18 @@ document.querySelectorAll(".accordion-collapse").forEach((panel) => {
   panel.style.display = panel.classList.contains("show") ? "block" : "none";
 });
 
-/* ─── MODAL — funciona con o sin Bootstrap JS ─────────────────── */
+/* ─── MODAL ───────────────────────────────────────────────────── */
+/* Inicializar modals ocultos */
+document.querySelectorAll(".modal").forEach((modal) => {
+  modal.style.display = "none";
+});
+
 document.querySelectorAll("[data-bs-toggle='modal']").forEach((button) => {
   button.addEventListener("click", () => {
     const target = document.querySelector(button.getAttribute("data-bs-target"));
     if (!target) return;
     target.classList.add("show");
-    target.style.display = "flex";
+    target.style.display      = "flex";
     document.body.style.overflow = "hidden";
   });
 });
@@ -118,7 +134,7 @@ document.querySelectorAll("[data-bs-dismiss='modal']").forEach((btn) => {
     const modal = btn.closest(".modal");
     if (!modal) return;
     modal.classList.remove("show");
-    modal.style.display = "none";
+    modal.style.display          = "none";
     document.body.style.overflow = "";
   });
 });
@@ -127,21 +143,18 @@ document.querySelectorAll(".modal").forEach((modal) => {
   modal.addEventListener("click", (e) => {
     if (e.target === modal) {
       modal.classList.remove("show");
-      modal.style.display = "none";
+      modal.style.display          = "none";
       document.body.style.overflow = "";
     }
   });
 });
 
-/* Inicializar modals ocultos */
-document.querySelectorAll(".modal").forEach((modal) => {
-  modal.style.display = "none";
-});
-
-/* ─── CAROUSEL — funciona con o sin Bootstrap JS ─────────────── */
+/* ─── CAROUSEL ────────────────────────────────────────────────── */
 document.querySelectorAll(".carousel").forEach((carousel) => {
-  const items = [...carousel.querySelectorAll(".carousel-item")];
+  const items      = [...carousel.querySelectorAll(".carousel-item")];
   const indicators = [...carousel.querySelectorAll(".carousel-indicators button")];
+  if (!items.length) return;
+
   let index = Math.max(0, items.findIndex((item) => item.classList.contains("active")));
 
   const showSlide = (nextIndex) => {
